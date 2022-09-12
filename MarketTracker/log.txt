@@ -1,0 +1,2 @@
+07/09/2022 15:47:10 - Buscando produtos 'Cerveja' no site. Link: https://mercado.carrefour.com.br/s/Cerveja?map=term
+07/09/2022 15:49:57 - Buscando produtos 'Cerveja' no site. Link: https://mercado.carrefour.com.br/s/Cerveja?map=term
