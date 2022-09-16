@@ -14,90 +14,196 @@ namespace SmartAssistInforTecApi.Controllers
     [Route("Api/BaseDeProdutos/")]
     public class BaseDeProdutosController : ControllerBase
     {
+        #region Tentativa de Extração de Produtos do Carrefour
+
+        //[HttpGet]
+        //[Route("ExtrairProdutosCarrefourPorNomeDeProduto/{nomeProduto}"), AllowAnonymous]
+        //public ActionResult<string> ExtrairProdutosCarrefourPorNomeDeProduto(string nomeProduto,
+        //    [FromServices] IMercados _mercadosRepo,
+        //    [FromServices] IProdutos _produtosRepo,
+        //    [FromServices] IRelMercadoProdutoPreco _relMercadoProdutoPreco)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest();
+
+        //    string erro = "";
+        //    int qtdTentativasPorPeca = 5;
+
+        //    string[] produtosToSearch = new string[] { "Cerveja", "Biscoito", "Vinho", "Arroz", "Feijão" };
+
+        //    foreach (string produto in produtosToSearch)
+        //    {
+
+        //        WriteLog($"{DateTime.Now} - Buscando produtos '{produto}' no site. Link: https://mercado.carrefour.com.br/s/{produto}?map=term");
+
+        //        try
+        //        {
+        //            string htmlPage = "";//GetHtmlResponseFromUrl($"https://mercado.carrefour.com.br/s/{produto}?map=term", qtdTentativasPorPeca);
+
+        //            List<REL_MERCADO_PRODUTO_PRECO> produtos = LeitorDeProdutos.GetProdutosCarrefourByHtmlString(htmlPage);
+
+        //            WriteLog($"{DateTime.Now} - Produtos lido com sucesso. {Environment.NewLine} {JsonConvert.SerializeObject(produtos)}");
+
+        //            return Ok(produtos);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+
+        //    return NotFound();
+        //}
+
+        #endregion
+
         [HttpGet]
-        [Route("ExtrairProdutosCarrefourPorNomeDeProduto/{nomeProduto}"), AllowAnonymous]
-        public ActionResult<string> ExtrairProdutosCarrefourPorNomeDeProduto(string nomeProduto,
-            [FromServices] IMercados _mercadosRepo,
-            [FromServices] IProdutos _produtosRepo,
-            [FromServices] IRelMercadoProdutoPreco _relMercadoProdutoPreco)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
-            string erro = "";
-            int qtdTentativasPorPeca = 5;
-
-            string[] produtosToSearch = new string[] { "Cerveja", "Biscoito", "Vinho", "Arroz", "Feijão" };
-
-            foreach (string produto in produtosToSearch)
-            {
-
-                WriteLog($"{DateTime.Now} - Buscando produtos '{produto}' no site. Link: https://mercado.carrefour.com.br/s/{produto}?map=term");
-
-                try
-                {
-                    string htmlPage = "";//GetHtmlResponseFromUrl($"https://mercado.carrefour.com.br/s/{produto}?map=term", qtdTentativasPorPeca);
-
-                    List<REL_MERCADO_PRODUTO_PRECO> produtos = LeitorDeProdutos.GetProdutosCarrefourByHtmlString(htmlPage);
-
-                    WriteLog($"{DateTime.Now} - Produtos lido com sucesso. {Environment.NewLine} {JsonConvert.SerializeObject(produtos)}");
-
-                    return Ok(produtos);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest();
-                }
-            }
-
-            return NotFound();
-        }
-
-        [HttpPost]
-        [Route("RegistrarProduto"), AllowAnonymous]
-        public ActionResult<bool> RegistrarProduto([FromBody] PRODUTOS produtoToInsert,
+        [Route("GetProdutoByID/{produtoID}"), AllowAnonymous]
+        public ActionResult<PRODUTOS> GetProdutoByID(int produtoID,
             [FromServices] IProdutos _produtosRepo)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            PRODUTOS produtoCreated = null;
+            PRODUTOS produtoDatabase;
 
             try
             {
-                _produtosRepo.AdicionarProduto(produtoToInsert.NOME, produtoToInsert.COD_BARRAS);
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                produtoDatabase = _produtosRepo.GetByProdutoByID(produtoID);
 
-            return Ok(true);
-        }
-
-        [HttpPost]
-        [Route("RegistrarMercado"), AllowAnonymous]
-        public ActionResult<bool> RegistrarMercado([FromBody] MERCADOS mercadoToInsert,
-            [FromServices] IMercados _mercadosRepo)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
-            try
-            {
-                _mercadosRepo.AdicionarMercado(mercadoToInsert.NOME);
+                if (produtoDatabase == null)
+                    return NotFound("Não foi encontrado nenhum produto a partir do ID informado.");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
 
-            return Ok(true);
+            return Ok(produtoDatabase);
+        }
+
+        [HttpGet]
+        [Route("BuscaProdutosPorNome/{nomeProduto}"), AllowAnonymous]
+        public ActionResult<List<PRODUTOS>> BuscaProdutosPorNome(string nomeProduto,
+            [FromServices] IProdutos _produtosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<PRODUTOS> produtosDatabase;
+
+            try
+            {
+                produtosDatabase = _produtosRepo.BuscaProdutosPorNome(nomeProduto);
+
+                if (produtosDatabase.Count == 0)
+                    return NotFound("Não foi encontrado nenhum produto a partir do texto de busca.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(produtosDatabase);
+        }
+
+        [HttpGet]
+        [Route("GetMercadoByID/{mercadoID}"), AllowAnonymous]
+        public ActionResult<MERCADOS> GetMercadoByID(int mercadoID,
+            [FromServices] IMercados _mercadosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            MERCADOS mercadoDatabase;
+
+            try
+            {
+                mercadoDatabase = _mercadosRepo.GetByMercadoByID(mercadoID);
+
+                if (mercadoDatabase == null)
+                    return NotFound("Não foi encontrado nenhum mercado a partir do ID informado.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(mercadoDatabase);
+        }
+
+        [HttpGet]
+        [Route("BuscaMercadoPorNome/{nomeMercado}"), AllowAnonymous]
+        public ActionResult<List<MERCADOS>> BuscaMercadoPorNome(string nomeMercado,
+            [FromServices] IMercados _mercadosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<MERCADOS> mercadosDatabase;
+
+            try
+            {
+                mercadosDatabase = _mercadosRepo.BuscaMercadosPorNome(nomeMercado);
+
+                if (mercadosDatabase.Count == 0)
+                    return NotFound("Não foi encontrado nenhum mercado a partir do texto de busca.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(mercadosDatabase);
         }
 
         [HttpPost]
-        [Route("RegistrarPrecoDeProduto"), AllowAnonymous]
-        public ActionResult<bool> RegistrarPrecoDeProduto([FromBody] REL_MERCADO_PRODUTO_PRECO precoToInsert,
+        [Route("RegistrarProduto/{nomeProduto}"), AllowAnonymous]
+        public ActionResult<PRODUTOS> RegistrarProduto(string nomeProduto,
+            [FromServices] IProdutos _produtosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            PRODUTOS produtoCreated;
+
+            try
+            {
+                produtoCreated = _produtosRepo.AdicionarProduto(nomeProduto, "");
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(produtoCreated);
+        }
+
+        [HttpPost]
+        [Route("RegistrarMercado/{nomeMercado}"), AllowAnonymous]
+        public ActionResult<MERCADOS> RegistrarMercado(string nomeMercado,
+            [FromServices] IMercados _mercadosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            MERCADOS mercadoCreated;
+
+            try
+            {
+                mercadoCreated = _mercadosRepo.AdicionarMercado(nomeMercado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(mercadoCreated);
+        }
+
+        [HttpPost]
+        [Route("RegistrarPrecoDeProduto/{mercadoID}/{produtoID}/{precoID}"), AllowAnonymous]
+        public ActionResult<bool> RegistrarPrecoDeProduto(int mercadoID, int produtoID, decimal precoID,
             [FromServices] IRelMercadoProdutoPreco _relMercadoProdutoPreco)
         {
             if (!ModelState.IsValid)
@@ -105,7 +211,7 @@ namespace SmartAssistInforTecApi.Controllers
 
             try
             {
-                _relMercadoProdutoPreco.AdicionarNovaRelacaoMercadoProdutoPreco(precoToInsert.ID_MERCADO, precoToInsert.ID_PRODUTO, precoToInsert.PRECO);
+                _relMercadoProdutoPreco.AdicionarNovaRelacaoMercadoProdutoPreco(mercadoID, produtoID, precoID);
             }
             catch (Exception ex)
             {
@@ -138,6 +244,13 @@ namespace SmartAssistInforTecApi.Controllers
                 return NotFound();
 
             return Ok(produtos.OrderBy(x => x.PRECO));
+        }
+
+        [HttpGet]
+        [Route("ListarTodosOsProdutosRelacionados"), AllowAnonymous]
+        public ActionResult<List<REL_MERCADO_PRODUTO_PRECO>> ListarTodosOsProdutosRelacionados([FromServices] IRelMercadoProdutoPreco _relProdutoPreco)
+        {
+            return Ok(_relProdutoPreco.ListarTodos());
         }
 
         #region OLD 

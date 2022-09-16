@@ -2,6 +2,8 @@
 using MarketTracker.Models;
 using Microsoft.EntityFrameworkCore;
 using SmartAssistInforTecApi.Data;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MarketTracker.Repositories
@@ -19,17 +21,36 @@ namespace MarketTracker.Repositories
         {
             PRODUTOS produtoDatabase = _context.Produtos
                 .AsNoTracking()
-                .FirstOrDefault(x => x.NOME.ToUpper() == nome.ToUpper() || (x.COD_BARRAS != null && x.COD_BARRAS == codigoBarras));
+                .FirstOrDefault(x => x.NOME.ToUpper() == nome.ToUpper());
 
             if (produtoDatabase != null)
-                return produtoDatabase;
+                throw new Exception("Já existe um produto com o nome informado.");
 
-            produtoDatabase = new PRODUTOS { NOME = nome, COD_BARRAS = codigoBarras };
+            produtoDatabase = new PRODUTOS 
+            { 
+                NOME = nome,
+                COD_BARRAS = codigoBarras
+            };
 
             _context.Add(produtoDatabase);
             _context.SaveChanges();
 
             return produtoDatabase;
+        }
+
+        public List<PRODUTOS> BuscaProdutosPorNome(string nomeProduto)
+        {
+            return _context.Produtos
+                .AsNoTracking()
+                .Where(x => x.NOME.ToUpper().Contains(nomeProduto.ToUpper()))
+                .ToList();
+        }
+
+        public PRODUTOS GetByProdutoByID(int produtoID)
+        {
+            return _context.Produtos
+                .AsNoTracking()
+                .FirstOrDefault(x => x.ID == produtoID);
         }
     }
 }

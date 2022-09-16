@@ -18,15 +18,31 @@ namespace MarketTracker.Repositories
             _context = context;
         }
 
-        public bool AdicionarMercado(string nome)
+        public MERCADOS AdicionarMercado(string nome)
         {
             if (_context.Mercados.AsNoTracking().FirstOrDefault(x => x.NOME == nome) != null)
                 throw new Exception("Já existe um mercado com o nome informado.");
 
-            _context.Mercados.Add(new MERCADOS { NOME = nome });
+            MERCADOS novoMercado = new MERCADOS { NOME = nome };
+            _context.Mercados.Add(novoMercado);
             _context.SaveChanges();
 
-            return true;
+            return novoMercado;
+        }
+
+        public List<MERCADOS> BuscaMercadosPorNome(string nomeMercado)
+        {
+            return _context.Mercados
+                .AsNoTracking()
+                .Where(x => x.NOME.ToUpper().Contains(nomeMercado.ToUpper()))
+                .ToList();
+        }
+
+        public MERCADOS GetByMercadoByID(int mercadoID)
+        {
+            return _context.Mercados
+                .AsNoTracking()
+                .FirstOrDefault(x => x.ID == mercadoID);
         }
     }
 }

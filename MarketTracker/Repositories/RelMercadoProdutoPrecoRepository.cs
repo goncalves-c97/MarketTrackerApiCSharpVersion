@@ -17,7 +17,7 @@ namespace MarketTracker.Repositories
             _context = context;
         }
 
-        public bool AdicionarNovaRelacaoMercadoProdutoPreco(int mercadoID, int produtoID, decimal preco)
+        public REL_MERCADO_PRODUTO_PRECO AdicionarNovaRelacaoMercadoProdutoPreco(int mercadoID, int produtoID, decimal preco)
         {
             REL_MERCADO_PRODUTO_PRECO relacaoMercadoProdutoPreco = new REL_MERCADO_PRODUTO_PRECO
             {
@@ -29,7 +29,8 @@ namespace MarketTracker.Repositories
 
             _context.Add(relacaoMercadoProdutoPreco);
             _context.SaveChanges();
-            return true;
+
+            return relacaoMercadoProdutoPreco;
         }
 
         public List<REL_MERCADO_PRODUTO_PRECO> BuscarPorTexto(string textoDeBusca)
@@ -39,6 +40,15 @@ namespace MarketTracker.Repositories
                 .Include(x => x.MERCADO)
                 .Include(x => x.PRODUTO)
                 .Where(x => x.PRODUTO.NOME.ToUpper().Contains(textoDeBusca))
+                .ToList();
+        }
+
+        public List<REL_MERCADO_PRODUTO_PRECO> ListarTodos()
+        {
+            return _context.Precos
+                .AsNoTracking()
+                .Include(x => x.MERCADO)
+                .Include(x => x.PRODUTO)
                 .ToList();
         }
     }

@@ -8,7 +8,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA1kwA65dZvkGVlVrELArXfwAAAAACAAAAAAAQZgAAAAEAACAAAAB4LCDFjnRrDsYSvnM8DDF9oqB6VUMg2ia6TQQ6Yl6z/gAAAAAOgAAAAAIAACAAAABuk2zvd+oJokywVcgji4l5P+fOqHLwBCV9zwgEdZzx9CAAAADPSKSEbMuwCXsid3NqADlycuhxVvXmcKL2f7Kt+HRxykAAAACxlJFMStm1HaLCalD5DcZADSrOD1JbNLt+kvZsr7ODk3rONmVdsNq4sx9KNaammvJKaB1Lu09r6/IHZ/qaMTOx</EncryptedPassword>
     <_PublishTargetUrl>ftp://win8049.site4now.net/markettrackerec7-001-site1.etempurl.com</_PublishTargetUrl>
-    <History>True|2022-09-13T02:32:28.9455970Z;False|2022-09-12T23:23:37.5478222-03:00;</History>
+    <History>True|2022-09-16T23:19:01.1367383Z;True|2022-09-12T23:32:28.9455970-03:00;False|2022-09-12T23:23:37.5478222-03:00;</History>
   </PropertyGroup>
   <ItemGroup>
     <File Include="appsettings.Development.json">
@@ -18,25 +18,25 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>09/12/2022 22:58:07</publishTime>
     </File>
     <File Include="MarketTracker.deps.json">
-      <publishTime>09/12/2022 23:27:29</publishTime>
+      <publishTime>09/16/2022 20:10:27</publishTime>
     </File>
     <File Include="MarketTracker.dll">
-      <publishTime>09/12/2022 23:27:29</publishTime>
+      <publishTime>09/16/2022 20:10:25</publishTime>
     </File>
     <File Include="MarketTracker.exe">
-      <publishTime>09/12/2022 23:27:29</publishTime>
+      <publishTime>09/16/2022 20:10:25</publishTime>
     </File>
     <File Include="MarketTracker.pdb">
-      <publishTime>09/12/2022 23:27:29</publishTime>
+      <publishTime>09/16/2022 20:10:25</publishTime>
     </File>
     <File Include="MarketTracker.runtimeconfig.json">
       <publishTime>09/12/2022 22:58:15</publishTime>
     </File>
     <File Include="MarketTracker.Views.dll">
-      <publishTime>09/12/2022 23:27:29</publishTime>
+      <publishTime>09/16/2022 20:10:26</publishTime>
     </File>
     <File Include="MarketTracker.Views.pdb">
-      <publishTime>09/12/2022 23:27:29</publishTime>
+      <publishTime>09/16/2022 20:10:26</publishTime>
     </File>
     <File Include="Microsoft.Data.SqlClient.dll">
       <publishTime>08/25/2020 20:24:48</publishTime>
@@ -174,7 +174,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/15/2019 05:37:42</publishTime>
     </File>
     <File Include="web.config">
-      <publishTime>09/12/2022 23:27:34</publishTime>
+      <publishTime>09/16/2022 20:10:27</publishTime>
     </File>
     <File Include="wwwroot/css/site.css">
       <publishTime>09/07/2022 12:51:32</publishTime>
