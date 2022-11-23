@@ -44,5 +44,12 @@ namespace MarketTracker.Repositories
                 .AsNoTracking()
                 .FirstOrDefault(x => x.ID == mercadoID);
         }
+
+        public List<MERCADOS> ListarMercados()
+        {
+            return _context.Mercados
+                .OrderBy(x => x.NOME)
+                .ToList();
+        }
     }
 }

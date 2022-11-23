@@ -6,6 +6,7 @@ namespace MarketTracker.Interfaces
     public interface IMercados
     {
         public MERCADOS GetByMercadoByID(int mercadoID);
+        public List<MERCADOS> ListarMercados();
         public List<MERCADOS> BuscaMercadosPorNome(string nomeMercado);
         public MERCADOS AdicionarMercado(string nome);
     }

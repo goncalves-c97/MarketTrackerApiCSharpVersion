@@ -1,4 +1,5 @@
-﻿using MarketTracker.Interfaces;
+﻿using MarketTracker.Entities;
+using MarketTracker.Interfaces;
 using MarketTracker.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,6 +84,30 @@ namespace SmartAssistInforTecApi.Controllers
         }
 
         [HttpGet]
+        [Route("ListarProdutos"), AllowAnonymous]
+        public ActionResult<List<PRODUTOS>> ListarProdutos([FromServices] IProdutos _produtosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<PRODUTOS> produtosDatabase;
+
+            try
+            {
+                produtosDatabase = _produtosRepo.ListarProdutos();
+
+                if (produtosDatabase.Count == 0)
+                    return NotFound("Não foi encontrado nenhum produto.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(produtosDatabase);
+        }
+
+        [HttpGet]
         [Route("BuscaProdutosPorNome/{nomeProduto}"), AllowAnonymous]
         public ActionResult<List<PRODUTOS>> BuscaProdutosPorNome(string nomeProduto,
             [FromServices] IProdutos _produtosRepo)
@@ -133,6 +158,30 @@ namespace SmartAssistInforTecApi.Controllers
         }
 
         [HttpGet]
+        [Route("ListarMercados"), AllowAnonymous]
+        public ActionResult<List<MERCADOS>> ListarMercados([FromServices] IMercados _mercadosRepo)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<MERCADOS> mercadosDatabase;
+
+            try
+            {
+                mercadosDatabase = _mercadosRepo.ListarMercados();
+
+                if (mercadosDatabase.Count == 0)
+                    return NotFound("Não foi encontrado nenhum mercado.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(mercadosDatabase);
+        }
+
+        [HttpGet]
         [Route("BuscaMercadoPorNome/{nomeMercado}"), AllowAnonymous]
         public ActionResult<List<MERCADOS>> BuscaMercadoPorNome(string nomeMercado,
             [FromServices] IMercados _mercadosRepo)
@@ -171,7 +220,7 @@ namespace SmartAssistInforTecApi.Controllers
             {
                 produtoCreated = _produtosRepo.AdicionarProduto(nomeProduto, "");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -244,6 +293,172 @@ namespace SmartAssistInforTecApi.Controllers
                 return NotFound();
 
             return Ok(produtos.OrderBy(x => x.PRECO));
+        }
+
+        [HttpGet]
+        [Route("BuscarProdutoByTextoAndLatLong/{textoDeBusca}/{latitude}/{longitude}"), AllowAnonymous]
+        public ActionResult<List<BuscaProdutoViewModel>> BuscarProdutoByTextoAndLatLong(string textoDeBusca, double latitude, double longitude,
+            [FromServices] IRelMercadoProdutoPreco _relProdutoPreco)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<REL_MERCADO_PRODUTO_PRECO> produtos = null;
+
+            try
+            {
+                produtos = _relProdutoPreco.BuscarPorTexto(textoDeBusca.ToUpper());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            if (produtos.Count == 0)
+                return NotFound();
+
+            List<BuscaProdutoViewModel> returnList = new List<BuscaProdutoViewModel>();
+
+            foreach (REL_MERCADO_PRODUTO_PRECO relacao in produtos)
+            {
+                returnList.Add(new BuscaProdutoViewModel
+                {
+                    DATA_HORA_REGISTRO = relacao.DATA_HORA_REGISTRO,
+                    MERCADO = relacao.MERCADO.NOME,
+                    ENDERECO_MERCADO = relacao.MERCADO.ENDERECO_COMPLETO,
+                    PRODUTO = relacao.PRODUTO.NOME,
+                    PRECO = relacao.PRECO,
+                    DISTANCIA = CoordinatesHelper.GetDistanceBetweenPoints(latitude, longitude, Convert.ToDouble(relacao.MERCADO.LAT), Convert.ToDouble(relacao.MERCADO.LONG))
+                });
+            }
+
+            return Ok(returnList.OrderBy(x => x.PRECO));
+        }
+
+        [HttpPost]
+        [Route("BuscarByProdutosIDsListAndLatLong/{latitude}/{longitude}"), AllowAnonymous]
+        public ActionResult<List<BuscaProdutoViewModel>> BuscarByProdutosIDsListAndLatLong([FromBody] List<int> produtosIds, double latitude, double longitude,
+            [FromServices] IRelMercadoProdutoPreco _relProdutoPreco)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<REL_MERCADO_PRODUTO_PRECO> produtos = null;
+
+            try
+            {
+                produtos = _relProdutoPreco.BuscarPorIdsProdutos(produtosIds);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            if (produtos.Count == 0)
+                return NotFound();
+
+            produtos = produtos
+                .OrderBy(x => x.ID_MERCADO)
+                .ToList();
+
+            List<BuscaProdutoViewModel> returnList = new List<BuscaProdutoViewModel>();
+
+            int mercadoAtual = -1;
+            int quantidadeProdutos = 0;
+
+            List<BuscaCarrinhoProdutosViewModel> carrinhoMercado = new List<BuscaCarrinhoProdutosViewModel>();
+
+            foreach (REL_MERCADO_PRODUTO_PRECO relacao in produtos)
+            {
+                if (mercadoAtual != relacao.ID_MERCADO)
+                {
+                    carrinhoMercado.Add(new BuscaCarrinhoProdutosViewModel
+                    {
+                        MERCADO = relacao.MERCADO.NOME,
+                        ENDERECO_MERCADO = relacao.MERCADO.ENDERECO_COMPLETO,
+                        VALOR_TOTAL = relacao.PRECO,
+                        DISTANCIA = CoordinatesHelper.GetDistanceBetweenPoints(latitude, longitude, Convert.ToDouble(relacao.MERCADO.LAT), Convert.ToDouble(relacao.MERCADO.LONG))
+                    });
+
+                    carrinhoMercado.Last().PRODUTOS_DISPONIVEIS.Add(relacao.ID_PRODUTO);
+                    mercadoAtual = relacao.ID_MERCADO;
+                }
+                else
+                {
+                    carrinhoMercado.Last().PRODUTOS_DISPONIVEIS.Add(relacao.ID_PRODUTO);
+                    carrinhoMercado.Last().VALOR_TOTAL += relacao.PRECO;
+                }
+            }
+
+            return Ok(carrinhoMercado.OrderBy(x => x.VALOR_TOTAL));
+        }
+
+        [HttpGet]
+        [Route("BuscarByProdutosIDsListAndLatLong/{latitude}/{longitude}/{ids}"), AllowAnonymous]
+        public ActionResult<List<BuscaProdutoViewModel>> BuscarByProdutosIDsListAndLatLong(string ids, double latitude, double longitude,
+            [FromServices] IRelMercadoProdutoPreco _relProdutoPreco)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            List<REL_MERCADO_PRODUTO_PRECO> produtos = null;
+
+            string[] splitIds = ids.Split(",");
+
+            List<int> produtosIds = new List<int>();
+
+            foreach(string id in splitIds)
+            {
+                if (int.TryParse(id, out int convertedID))
+                    produtosIds.Add(convertedID);
+            }
+
+            try
+            {
+                produtos = _relProdutoPreco.BuscarPorIdsProdutos(produtosIds);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            if (produtos.Count == 0)
+                return NotFound();
+
+            produtos = produtos
+                .OrderBy(x => x.ID_MERCADO)
+                .ToList();
+
+            List<BuscaProdutoViewModel> returnList = new List<BuscaProdutoViewModel>();
+
+            int mercadoAtual = -1;
+            int quantidadeProdutos = 0;
+
+            List<BuscaCarrinhoProdutosViewModel> carrinhoMercado = new List<BuscaCarrinhoProdutosViewModel>();
+
+            foreach (REL_MERCADO_PRODUTO_PRECO relacao in produtos)
+            {
+                if (mercadoAtual != relacao.ID_MERCADO)
+                {
+                    carrinhoMercado.Add(new BuscaCarrinhoProdutosViewModel
+                    {
+                        MERCADO = relacao.MERCADO.NOME,
+                        ENDERECO_MERCADO = relacao.MERCADO.ENDERECO_COMPLETO,
+                        VALOR_TOTAL = relacao.PRECO * produtosIds.Where(x => x == relacao.ID_PRODUTO).Count(),
+                        DISTANCIA = CoordinatesHelper.GetDistanceBetweenPoints(latitude, longitude, Convert.ToDouble(relacao.MERCADO.LAT), Convert.ToDouble(relacao.MERCADO.LONG))
+                    });
+
+                    carrinhoMercado.Last().PRODUTOS_DISPONIVEIS.Add(relacao.ID_PRODUTO);
+                    mercadoAtual = relacao.ID_MERCADO;
+                }
+                else
+                {
+                    carrinhoMercado.Last().PRODUTOS_DISPONIVEIS.Add(relacao.ID_PRODUTO);
+                    carrinhoMercado.Last().VALOR_TOTAL += relacao.PRECO;
+                }
+            }
+
+            return Ok(carrinhoMercado.OrderBy(x => x.VALOR_TOTAL));
         }
 
         [HttpGet]

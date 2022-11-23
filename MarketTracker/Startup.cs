@@ -43,7 +43,7 @@ namespace MarketTracker
                 x.SwaggerDoc("v1",
                     new OpenApiInfo
                     {
-                        Title = "hueuheuhe",
+                        Title = "Market Tracker",
                         Version = "v1",
                         Description = "Api do Market Tracker",
                         Contact = new OpenApiContact { Name = "Martket Tracker", Email = "markettracker@support.com" }

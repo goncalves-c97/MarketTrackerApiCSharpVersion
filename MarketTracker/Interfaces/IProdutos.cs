@@ -7,6 +7,7 @@ namespace MarketTracker.Interfaces
     {
         public PRODUTOS GetByProdutoByID(int mercadoID);
         public List<PRODUTOS> BuscaProdutosPorNome(string nomeMercado);
+        public List<PRODUTOS> ListarProdutos();
 
         /// <summary>
         /// Adiciona o produto e retorna o produto inserido no banco, caso já exista o produto, este é retornado

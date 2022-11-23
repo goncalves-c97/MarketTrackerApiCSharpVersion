@@ -52,5 +52,12 @@ namespace MarketTracker.Repositories
                 .AsNoTracking()
                 .FirstOrDefault(x => x.ID == produtoID);
         }
+
+        public List<PRODUTOS> ListarProdutos()
+        {
+            return _context.Produtos
+                .OrderBy(x => x.NOME)
+                .ToList();
+        }
     }
 }

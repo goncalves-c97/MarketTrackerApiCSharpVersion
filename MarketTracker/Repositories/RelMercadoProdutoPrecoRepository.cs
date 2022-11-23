@@ -33,6 +33,15 @@ namespace MarketTracker.Repositories
             return relacaoMercadoProdutoPreco;
         }
 
+        public List<REL_MERCADO_PRODUTO_PRECO> BuscarPorIdsProdutos(List<int> idsProdutos)
+        {
+            return _context.Precos
+                .AsNoTracking()
+                .Where(x => idsProdutos.Any(i => i == x.ID_PRODUTO))
+                .Include(x => x.MERCADO)
+                .ToList();
+        }
+
         public List<REL_MERCADO_PRODUTO_PRECO> BuscarPorTexto(string textoDeBusca)
         {
             return _context.Precos
